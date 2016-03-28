@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  Copyright (C) 2012 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:paddingTop="?android:attr/actionBarSize">
+
+    <ProgressBar
+        android:id="@+id/progressbar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="75dp">
+
+        <LinearLayout
+            android:id="@+id/image_options"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top"
+            android:orientation="vertical">
+
+            <com.google.android.gms.ads.AdView
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                ads:adSize="SMART_BANNER"
+                ads:adUnitId="@string/banner_ad_unit_id" />
+
+            <com.cm.android.winecellar.ui.RecyclingImageView
+                android:id="@+id/imageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:contentDescription="@string/imageview_description"
+                android:scaleType="fitCenter"
+                android:src="@drawable/empty_photo"/>
+
+            <RatingBar
+                android:id="@+id/rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:focusableInTouchMode="true"
+                android:gravity="center_vertical"
+                android:numStars="5"
+                android:rating="0"
+                android:stepSize="1.0" />
+            <TextView
+                android:id="@+id/date_created_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+            <TextView
+                android:id="@+id/date_updated_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+            <TextView
+                android:id="@+id/wine_type_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:text="@string/wine_type_label"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <View
+                android:id="@+id/divider1"
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@drawable/divider" />
+
+            <AutoCompleteTextView android:id="@+id/wine"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:layout_marginLeft="5dp"
+                android:text=""
+                android:lines="1"
+                android:hint="@string/wine_hint"
+                android:focusableInTouchMode="true"
+                android:singleLine="true"
+                android:nextFocusDown="@+id/text_extract"/>
+
+            <TextView
+                android:id="@+id/wine_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:text="@string/wine_label"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@drawable/divider" />
+
+            <EditText
+                android:id="@+id/text_extract"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:focusableInTouchMode="true"
+                android:hint="@string/text_extract_hint"
+                android:inputType="textMultiLine"
+                android:lines="4"
+                android:scrollHorizontally="false"
+                android:nextFocusDown="@+id/notes"/>
+
+            <TextView
+                android:id="@+id/notes_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/notes_label"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <View
+                android:id="@+id/divider3"
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@drawable/divider" />
+
+            <EditText
+                android:id="@+id/notes"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:focusableInTouchMode="true"
+                android:hint="@string/notes_hint"
+                android:inputType="textMultiLine"
+                android:lines="4"
+                android:scrollHorizontally="false"
+                android:nextFocusDown="@+id/save" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <ImageView
+        android:id="@+id/save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/save_icon" />
+    <!--end: anshu -->
+</FrameLayout><!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/layout/image_detail_fragment.xml -->

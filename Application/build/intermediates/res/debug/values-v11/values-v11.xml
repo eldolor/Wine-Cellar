@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values-v11/styles.xml -->
+    <eat-comment/>
+    <style name="AppTheme" parent="@android:style/Theme.Holo.Light">
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@color/background_material_light</item>
+        <item name="android:actionBarStyle">@style/AppThemeActionBar</item>
+        <item name="android:textColor">@color/primary_text_default_material_light</item>
+    </style>
+    <style name="AppTheme.FullScreen"/>
+    <style name="AppThemeActionBar" parent="@android:style/Widget.Holo.ActionBar">
+        <item name="android:background">@color/theme_action_bar</item>
+    </style>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values-v11/template-styles.xml -->
+    <eat-comment/>
+    <style name="Theme.Base" parent="android:Theme.Holo.Light"/>
+</resources>

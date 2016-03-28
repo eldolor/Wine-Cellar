@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/colors.xml -->
+    <eat-comment/>
+    <color name="amber">#FFC107</color>
+    <color name="background_material_light">#FFFAFAFA</color>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.android.support/cardview-v7/24.0.0-alpha1/res/values/values.xml -->
+    <eat-comment/>
+    <color name="cardview_dark_background">#FF424242</color>
+    <color name="cardview_light_background">#FFFFFFFF</color>
+    <color name="cardview_shadow_end_color">#03000000</color>
+    <color name="cardview_shadow_start_color">#37000000</color>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/colors.xml -->
+    <eat-comment/>
+    <color name="colorAccent">#4CAF50</color>
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="grid_state_focused">#80000000</color>
+    <color name="grid_state_pressed">#1Affffff</color>
+    <color name="list_background">#FFFFFF</color>
+    <color name="list_background_pressed">#FFF4D9</color>
+    <color name="list_divider">#FFFFFF</color>
+    <color name="list_item_title">#000000</color>
+    <color name="primary_text_default_material_light">#DE000000</color>
+    <color name="red">#F44336</color>
+    <color name="theme_action_bar">#9BCC5F</color>
+    <color name="theme_green">#9BCC5F</color>
+    <color name="white">#ffffff</color>
+    <declare-styleable name="AdsAttrs"><attr format="string" name="adSize"/><attr format="string" name="adSizes"/><attr format="string" name="adUnitId"/></declare-styleable>
+    <declare-styleable name="CardView"><attr format="color" name="cardBackgroundColor"/><attr format="dimension" name="cardCornerRadius"/><attr format="dimension" name="cardElevation"/><attr format="dimension" name="cardMaxElevation"/><attr format="boolean" name="cardUseCompatPadding"/><attr format="boolean" name="cardPreventCornerOverlap"/><attr format="dimension" name="contentPadding"/><attr format="dimension" name="contentPaddingLeft"/><attr format="dimension" name="contentPaddingRight"/><attr format="dimension" name="contentPaddingTop"/><attr format="dimension" name="contentPaddingBottom"/><attr name="android:minWidth"/><attr name="android:minHeight"/></declare-styleable>
+    <declare-styleable name="GridLayout"><attr name="orientation"><enum name="horizontal" value="0"/><enum name="vertical" value="1"/></attr><attr format="integer" name="rowCount"/><attr format="integer" name="columnCount"/><attr format="boolean" name="useDefaultMargins"/><attr name="alignmentMode"><enum name="alignBounds" value="0"/><enum name="alignMargins" value="1"/></attr><attr format="boolean" name="rowOrderPreserved"/><attr format="boolean" name="columnOrderPreserved"/></declare-styleable>
+    <declare-styleable name="GridLayout_Layout"><attr name="android:layout_width"/><attr name="android:layout_height"/><attr name="android:layout_margin"/><attr name="android:layout_marginLeft"/><attr name="android:layout_marginTop"/><attr name="android:layout_marginRight"/><attr name="android:layout_marginBottom"/><attr format="integer" name="layout_row"/><attr format="integer" min="1" name="layout_rowSpan"/><attr format="float" name="layout_rowWeight"/><attr format="integer" name="layout_column"/><attr format="integer" min="1" name="layout_columnSpan"/><attr format="float" name="layout_columnWeight"/><attr name="layout_gravity"><flag name="top" value="0x30"/><flag name="bottom" value="0x50"/><flag name="left" value="0x03"/><flag name="right" value="0x05"/><flag name="center_vertical" value="0x10"/><flag name="fill_vertical" value="0x70"/><flag name="center_horizontal" value="0x01"/><flag name="fill_horizontal" value="0x07"/><flag name="center" value="0x11"/><flag name="fill" value="0x77"/><flag name="clip_vertical" value="0x80"/><flag name="clip_horizontal" value="0x08"/><flag name="start" value="0x00800003"/><flag name="end" value="0x00800005"/></attr></declare-styleable>
+    <declare-styleable name="LoadingImageView"><attr format="enum" name="imageAspectRatioAdjust"><enum name="none" value="0"/><enum name="adjust_width" value="1"/><enum name="adjust_height" value="2"/></attr><attr format="float" name="imageAspectRatio"/><attr format="boolean" name="circleCrop"/></declare-styleable>
+    <declare-styleable name="PinEntryView"><attr format="integer" name="numDigits"/><attr format="dimension" name="digitWidth"/><attr format="dimension" name="digitHeight"/><attr format="dimension" name="digitSpacing"/><attr format="reference|color" name="digitBackground"/><attr format="dimension" name="digitTextSize"/><attr format="color" name="digitTextColor"/><attr format="dimension" name="digitElevation"/><attr format="string" name="mask"/><attr format="color" name="pinAccentColor"/><attr format="dimension" name="accentWidth"/><attr format="enum" name="accentType"><enum name="none" value="0"/><enum name="all" value="1"/><enum name="character" value="2"/></attr><attr format="enum" name="pinInputType"><enum name="text" value="1"/><enum name="number" value="2"/></attr><attr format="boolean" name="accentRequiresFocus"/></declare-styleable>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/dimens.xml -->
+    <eat-comment/>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.android.support/cardview-v7/24.0.0-alpha1/res/values/values.xml -->
+    <eat-comment/>
+    <dimen name="cardview_compat_inset_shadow">1dp</dimen>
+    <dimen name="cardview_default_elevation">2dp</dimen>
+    <dimen name="cardview_default_radius">2dp</dimen>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/dimens.xml -->
+    <eat-comment/>
+    <dimen name="create_image_thumbnail_size">640dp</dimen>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.android.support/gridlayout-v7/24.0.0-alpha1/res/values/values.xml -->
+    <eat-comment/>
+    <dimen name="default_gap">8dip</dimen>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/template-dimens.xml -->
+    <eat-comment/>
+    <dimen name="horizontal_page_margin">@dimen/margin_medium</dimen>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/dimens.xml -->
+    <eat-comment/>
+    <dimen name="image_thumbnail_size">125dp</dimen>
+    <dimen name="image_thumbnail_spacing">1dp</dimen>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/template-dimens.xml -->
+    <eat-comment/>
+    <dimen name="margin_huge">64dp</dimen>
+    <dimen name="margin_large">32dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_tiny">4dp</dimen>
+    <dimen name="vertical_page_margin">@dimen/margin_medium</dimen>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.google.android.gms/play-services-basement/8.4.0/res/values/version.xml -->
+    <eat-comment/>
+    <integer name="google_play_services_version">8487000</integer>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/8.4.0/res/values/admob_strings.xml -->
+    <eat-comment/>
+    <string name="accept">Accept</string>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="app_name">Wine Cellar</string>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.google.android.gms/play-services-basement/8.4.0/res/values/auth_strings.xml -->
+    <eat-comment/>
+    <string name="auth_google_play_services_client_facebook_display_name">Facebook</string>
+    <string name="auth_google_play_services_client_google_display_name">Google</string>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="banner_ad_unit_id">ca-app-pub-0955368542600882/1573461700</string>
+    <string name="cloud_vision_api_key">AIzaSyAbKw_WrXG3de2ZL8ozmlCF4GYjrFLIYhI</string>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.google.android.gms/play-services-basement/8.4.0/res/values/common_strings.xml -->
+    <eat-comment/>
+    <string name="common_google_play_services_unknown_issue"><ns1:g id="app_name">%1$s</ns1:g> is having trouble with Google Play services. If the problem persists, please contact the developer for assistance.</string>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/8.4.0/res/values/admob_strings.xml -->
+    <eat-comment/>
+    <string name="create_calendar_message">Allow Ad to create a calendar event?</string>
+    <string name="create_calendar_title">Create calendar event</string>
+    <string name="decline">Decline</string>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="delete_menu">Delete</string>
+    <string name="edit_menu">Edit</string>
+    <string name="imageview_description">wine</string>
+    <string name="intro_header"/>
+    <string name="logout">Logout</string>
+    <string name="logout_menu">Logout</string>
+    <string name="no_network_connection_toast">No Network Connection</string>
+    <string name="notes_hint">Aroma, Body, Tannin, Acidity, Finish</string>
+    <string name="notes_label">Notes:</string>
+    <string name="save_label">Save</string>
+    <string name="search_menu">Search</string>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/8.4.0/res/values/admob_strings.xml -->
+    <eat-comment/>
+    <string name="store_picture_message">"Allow Ad to store image in Picture gallery?"</string>
+    <string name="store_picture_title">Save image</string>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="text_extract_hint">Varietal, Winery, Vintage Year</string>
+    <string name="wine_hint">Pinot Noir</string>
+    <string name="wine_label">Wine Label:</string>
+    <string name="wine_type_label">Wine:</string>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/styles.xml -->
+    <eat-comment/>
+    <style name="AppTheme" parent="android:Theme.Light"/>
+    <style name="AppTheme.FullScreen" parent="@android:style/Theme.Light.NoTitleBar.Fullscreen"/>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.android.support/cardview-v7/24.0.0-alpha1/res/values/values.xml -->
+    <eat-comment/>
+    <style name="CardView">
+        <item name="cardBackgroundColor">@color/cardview_light_background</item>
+        <item name="cardCornerRadius">@dimen/cardview_default_radius</item>
+        <item name="cardElevation">@dimen/cardview_default_elevation</item>
+        <item name="cardMaxElevation">@dimen/cardview_default_elevation</item>
+        <item name="cardUseCompatPadding">false</item>
+        <item name="cardPreventCornerOverlap">true</item>
+    </style>
+    <style name="CardView.Dark">
+        <item name="cardBackgroundColor">@color/cardview_dark_background</item>
+    </style>
+    <style name="CardView.Light">
+        <item name="cardBackgroundColor">@color/cardview_light_background</item>
+    </style>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/styles.xml -->
+    <eat-comment/>
+    <style name="PhotoGridLayout">
+        <item name="android:drawSelectorOnTop">true</item>
+        <item name="android:listSelector">@drawable/photogrid_list_selector</item>
+    </style>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/template-styles.xml -->
+    <eat-comment/>
+    <style name="Theme.Base" parent="android:Theme.Light"/>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/8.4.0/res/values/admob_iap_style.xml -->
+    <eat-comment/>
+    <style name="Theme.IAPTheme" parent="android:Theme">
+    <item name="android:windowIsTranslucent">true</item>
+    <item name="android:windowBackground">@android:color/transparent</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowIsFloating">true</item>
+    <item name="android:backgroundDimEnabled">false</item>
+  </style>
+    <!-- From: file:/Users/anshugaind/AndroidStudioProjects/Wine%20Cellar/Application/src/main/res/values/template-styles.xml -->
+    <eat-comment/>
+    <style name="Theme.Sample" parent="Theme.Base"/>
+    <style name="Widget"/>
+    <style name="Widget.SampleMessage">
+        <item name="android:textAppearance">?android:textAppearanceMedium</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+    </style>
+    <style name="Widget.SampleMessageTile">
+        <item name="android:background">@drawable/tile</item>
+        <item name="android:shadowColor">#7F000000</item>
+        <item name="android:shadowDy">-3.5</item>
+        <item name="android:shadowRadius">2</item>
+    </style>
+</resources>
