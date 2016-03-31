@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.List;
+
 //import com.vvw.config.AppConfig;
 //import com.vvw.util.Util;
 
@@ -32,17 +34,17 @@ public class NotesDbAdapter {
     public static final String KEY_NOTES = "notes";
     public static final String KEY_PICTURE = "picture";
     public static final String KEY_SHARE = "share";
+    public static final String KEY_URI = "uri";
     public static final String KEY_CREATED = "created";
     public static final String KEY_UPDATED = "updated";
 
 
     public static final String DATABASE_NAME = "wine_cellar_db.sqlite";
-    public static final int DATABASE_VERSION = 1; //9 FIELDS
+    public static final int DATABASE_VERSION = 1; //10 FIELDS
     public static final String DATABASE_TABLE = "wine_list_" + DATABASE_VERSION;
 
     private DatabaseHelper mDbHelper;
     private SQLiteDatabase mDb;
-
 
 
     /**
@@ -51,12 +53,13 @@ public class NotesDbAdapter {
     //8 FIELDS
     private static final String DATABASE_CREATE = "create table if not exists "
             + DATABASE_TABLE + " (" + KEY_ROWID + "  integer primary key,"
-            +KEY_WINE + " text default null,"
+            + KEY_WINE + " text default null,"
             + KEY_RATING + " text default null,"
             + KEY_TEXT_EXTRACT + " text default null,"
             + KEY_NOTES + " text default null,"
             + KEY_PICTURE + " text default null,"
             + KEY_SHARE + " text default null,"
+            + KEY_URI + " text default null,"
             + KEY_CREATED + " text default null,"
             + KEY_UPDATED + " text default null);";
 
@@ -162,6 +165,7 @@ public class NotesDbAdapter {
         initialValues.put(KEY_NOTES, note.notes.trim());
         initialValues.put(KEY_PICTURE, note.picture.trim());
         initialValues.put(KEY_SHARE, note.share.trim());
+        initialValues.put(KEY_URI, note.uri.trim());
         initialValues.put(KEY_CREATED,
                 String.valueOf(System.currentTimeMillis()));
         initialValues.put(KEY_UPDATED,
@@ -183,79 +187,6 @@ public class NotesDbAdapter {
         return mDb.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
     }
 
-    /**
-     * Return a Cursor over the list of all notes in the database
-     *
-     * @return Cursor over all notes
-     */
-    public Cursor fetchAllNotes() {
-
-        Log.i(TAG, "fetchAllNotes");
-
-        Cursor cursor = mDb.query(DATABASE_TABLE, new String[]
-                        {KEY_ROWID, KEY_WINE, KEY_RATING, KEY_TEXT_EXTRACT, KEY_NOTES, KEY_PICTURE, KEY_SHARE, KEY_CREATED, KEY_UPDATED}, null, null, null, null,
-                KEY_UPDATED + " DESC");
-        return cursor;
-    }
-
-    /**
-     * Return a Cursor over the list of all notes in the database
-     *
-     * @return Cursor over all notes
-     */
-    public Cursor fetchAllNotes(int page, int rowsPerPage) {
-
-        Log.i(TAG, "fetchAllNotes");
-        String limit = String.valueOf((page * rowsPerPage));
-
-        Cursor cursor = mDb.query(DATABASE_TABLE, new String[]
-                        {KEY_ROWID, KEY_WINE, KEY_RATING, KEY_TEXT_EXTRACT, KEY_NOTES, KEY_PICTURE, KEY_SHARE, KEY_CREATED, KEY_UPDATED}, null, null, null, null,
-                KEY_UPDATED + " DESC", limit);
-        if (cursor != null) {
-            if (page > 1) {
-                cursor.moveToPosition(((page - 1) * rowsPerPage));
-            }
-        }
-
-        return cursor;
-    }
-
-    /**
-     * Return a Cursor over the list of all notes in the database
-     *
-     * @return Cursor over all notes
-     */
-    public Cursor fetchAllNotes(int page, int rowsPerPage, String sortBy) {
-
-        Log.i(TAG, "fetchAllNotes");
-        String limit = String.valueOf((page * rowsPerPage));
-
-        Cursor cursor = mDb.query(DATABASE_TABLE, new String[]
-                        {KEY_ROWID, KEY_WINE, KEY_RATING, KEY_TEXT_EXTRACT, KEY_NOTES, KEY_PICTURE, KEY_SHARE, KEY_CREATED, KEY_UPDATED}, null, null, null, null,
-                sortBy, limit);
-        if (cursor != null) {
-            if (page > 1) {
-                cursor.moveToPosition(((page - 1) * rowsPerPage));
-            }
-        }
-
-        return cursor;
-    }
-
-    /**
-     * Return a Cursor over the list of all notes in the database
-     *
-     * @return Cursor over all notes
-     */
-    public Cursor fetchAllNotesData() {
-
-        Log.i(TAG, "fetchAllNotesData");
-
-        return mDb.query(DATABASE_TABLE, new String[]
-                        {KEY_ROWID, KEY_WINE, KEY_RATING, KEY_TEXT_EXTRACT, KEY_NOTES, KEY_PICTURE, KEY_SHARE, KEY_CREATED, KEY_UPDATED}, null, null, null, null,
-                KEY_UPDATED + " DESC");
-
-    }
 
     /**
      * Return a Cursor positioned at the note that matches the given rowId
@@ -264,19 +195,30 @@ public class NotesDbAdapter {
      * @return Cursor positioned to matching note, if found
      * @throws SQLException if note could not be found/retrieved
      */
-    public Cursor fetchNote(long rowId) throws SQLException {
+    public Note fetchNote(long rowId) throws SQLException {
 
         Log.i(TAG, "fetchNote:id=" + rowId);
+        Cursor cursor = null;
+        Note note = null;
+        try {
+            cursor =
 
-        Cursor cursor =
-
-                mDb.query(false, DATABASE_TABLE, new String[]
-                                {KEY_ROWID, KEY_WINE, KEY_RATING, KEY_TEXT_EXTRACT, KEY_NOTES, KEY_PICTURE, KEY_SHARE, KEY_CREATED, KEY_UPDATED},
-                        KEY_ROWID + "=" + rowId, null, null, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
+                    mDb.query(false, DATABASE_TABLE, new String[]
+                                    {KEY_ROWID, KEY_WINE, KEY_RATING, KEY_TEXT_EXTRACT, KEY_NOTES, KEY_PICTURE, KEY_SHARE, KEY_URI, KEY_CREATED, KEY_UPDATED},
+                            KEY_ROWID + "=" + rowId, null, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+            }
+            while (!cursor.isAfterLast()) {
+                note = cursorToNote(cursor);
+                cursor.moveToNext();
+            }
+            return note;
+        } finally {
+            if (cursor != null)
+                // make sure to close the cursor
+                cursor.close();
         }
-        return cursor;
 
     }
 
@@ -408,10 +350,42 @@ public class NotesDbAdapter {
             args.put(KEY_SHARE, note.share.trim());
         }
 
+        if ((note.uri != null) && ((!note.uri.equals("")))) {
+            args.put(KEY_URI, note.uri.trim());
+        }
 
         args.put(KEY_UPDATED, String.valueOf(System.currentTimeMillis()));
         return mDb
                 .update(DATABASE_TABLE, args, KEY_ROWID + "=" + note.id, null) > 0;
+    }
+
+
+    private Note cursorToNote(Cursor cursor) {
+
+        Note note = new Note();
+        note.id = cursor.getLong(cursor
+                .getColumnIndexOrThrow(NotesDbAdapter.KEY_ROWID));
+        note.wine = cursor.getString(cursor
+                .getColumnIndexOrThrow(NotesDbAdapter.KEY_WINE));
+        note.rating = cursor.getString(cursor
+                .getColumnIndexOrThrow(NotesDbAdapter.KEY_RATING));
+        note.textExtract = cursor.getString(cursor
+                .getColumnIndexOrThrow(NotesDbAdapter.KEY_TEXT_EXTRACT));
+        note.notes = cursor.getString(cursor
+                .getColumnIndexOrThrow(NotesDbAdapter.KEY_NOTES));
+        note.share = cursor.getString(cursor
+                .getColumnIndexOrThrow(NotesDbAdapter.KEY_SHARE));
+        note.picture = cursor.getString(cursor
+                .getColumnIndexOrThrow(NotesDbAdapter.KEY_PICTURE));
+        note.uri = cursor.getString(cursor
+                .getColumnIndex(NotesDbAdapter.KEY_URI));
+        note.created = cursor.getLong(cursor
+                .getColumnIndex(NotesDbAdapter.KEY_CREATED));
+        note.updated = cursor.getLong(cursor
+                .getColumnIndex(NotesDbAdapter.KEY_UPDATED));
+
+        return note;
+
     }
 
 }

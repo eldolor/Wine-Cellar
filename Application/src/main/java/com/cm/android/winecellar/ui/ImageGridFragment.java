@@ -23,8 +23,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build.VERSION_CODES;
@@ -49,40 +51,44 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
-import com.cm.android.common.logger.Log;
+import android.util.Log;
 import com.cm.android.winecellar.AnalyticsTrackers;
 import com.cm.android.winecellar.db.Note;
 import com.cm.android.winecellar.db.NotesDbAdapter;
 import com.cm.android.winecellar.provider.AuthProvider;
 import com.cm.android.winecellar.provider.Images;
+import com.cm.android.winecellar.util.Configuration;
 import com.cm.android.winecellar.util.ImageCache;
 import com.cm.android.winecellar.util.ImageFetcher;
 import com.cm.android.winecellar.util.ImageWorker;
 import com.cm.android.winecellar.util.Utils;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import me.philio.pinentry.PinEntryView;
-
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.api.client.http.HttpTransport;
-import com.vvw.activity.lite.BuildConfig;
-import com.vvw.activity.lite.R;
-
-import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.ByteArrayContent;
+import com.google.api.client.http.FileContent;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
+import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpMediaType;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
+import com.google.api.client.http.MultipartContent;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+
+import com.google.api.client.util.IOUtils;
+import com.google.api.client.util.Key;
+import com.google.api.client.util.Maps;
 import com.google.api.services.vision.v1.Vision;
 import com.google.api.services.vision.v1.VisionRequestInitializer;
 import com.google.api.services.vision.v1.model.AnnotateImageRequest;
@@ -91,6 +97,24 @@ import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
 import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.vvw.activity.lite.BuildConfig;
+import com.vvw.activity.lite.R;
+
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.TimeZone;
+
+import me.philio.pinentry.PinEntryView;
 
 /**
  * The main fragment that powers the ImageGridActivity screen. Fairly straight forward GridView
@@ -119,6 +143,8 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
     private Vibrator mVibrator;
     private GridView mGridView;
     private Bundle mExtras;
+
+    private ConnectivityManager mConnectivityManager;
 
 
     /**
@@ -151,6 +177,9 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
         mVibrator = (Vibrator) getActivity().getSystemService(getActivity().VIBRATOR_SERVICE);
 
         mExtras = getActivity().getIntent().getExtras();
+
+        mConnectivityManager = (ConnectivityManager) getActivity()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
 
         insertSeedData();
     }
@@ -381,7 +410,6 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
             callCloudVision(imageAbsolutePath, bitmap);
 
 
-
         } catch (Throwable e) {
             Log.d(TAG, "Image picking failed because " + e.getMessage());
             Toast.makeText(getActivity(), "Image picking failed because " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -397,7 +425,7 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
             @Override
             protected String doInBackground(Object... params) {
                 try {
-                    HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
+                    HttpTransport httpTransport = new NetHttpTransport();
                     JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
                     Vision.Builder builder = new Vision.Builder(httpTransport, jsonFactory, null);
@@ -453,20 +481,240 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
                 return "Cloud Vision API request failed. Check logs for details.";
             }
 
+            /**
+             * @param response
+             * @return
+             */
+            private String convertResponseToString(BatchAnnotateImagesResponse response) {
+                String message = "";
+
+                List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
+                if (labels != null) {
+                    for (EntityAnnotation label : labels) {
+                        message += String.format("%s", label.getDescription());
+                    }
+                }
+
+                return message;
+            }
+
             protected void onPostExecute(String result) {
                 //mImageDetails.setText(result);
-                Log.d(TAG, "RESULT " +
+                Log.i(TAG, "RESULT " +
                         result);
                 NotesDbAdapter dbHelper = null;
                 try {
                     dbHelper = new NotesDbAdapter(getActivity());
                     dbHelper.open();
-                    Note note = new Note();
-                    note.id = Utils.extractRowIdFromFileName(imageAbsolutePath);
-                    note.textExtract = result;
-                    dbHelper.createNote(note);
+                    Note newNote = new Note();
+                    newNote.id = Utils.extractRowIdFromFileName(imageAbsolutePath);
+                    newNote.textExtract = result;
+                    dbHelper.createNote(newNote);
 
                     //TODO: upload to cloud
+
+                    try{
+                        HttpTransport httpTransport = new NetHttpTransport();
+                        HttpRequestFactory requestFactory = httpTransport.createRequestFactory(new MyInitializer());
+                        GenericUrl genericUrl = new GenericUrl(Configuration.DROPBOX_URL);
+
+                        //Get the upload URL from server
+                        HttpRequest httpGetRequest = requestFactory.buildGetRequest(genericUrl);
+                        HttpResponse httpGetResponse = httpGetRequest.execute();
+                        Log.i(TAG, "HTTP STATUS:: " + httpGetResponse.getStatusCode());
+
+                        if (httpGetResponse.getStatusCode() == 200) {
+                            //MyUrl myUrl = null;
+                            JSONObject getJson = null;
+
+                            try {
+                                // process the HTTP response object
+                                String response = httpGetResponse.parseAsString();
+                                Log.i(TAG, "URL:: " + response);
+                                getJson = new JSONObject(response);
+                            } finally {
+                                httpGetResponse.disconnect();
+                            }
+
+                            //upload the image
+                            {
+                                Map<String, String> parameters = Maps.newHashMap();
+                                parameters.put("rowId", String.valueOf(newNote.id));
+
+                                // Add parameters
+                                MultipartContent content = new MultipartContent().setMediaType(
+                                        new HttpMediaType("multipart/form-data")
+                                                .setParameter("boundary", "__END_OF_PART__"));
+
+                                for (String name : parameters.keySet()) {
+                                    MultipartContent.Part part = new MultipartContent.Part(
+                                            new ByteArrayContent(null, parameters.get(name).getBytes()));
+                                    part.setHeaders(new HttpHeaders().set(
+                                            "Content-Disposition", String.format("form-data; name=\"%s\"", name)));
+                                    content.addPart(part);
+                                }
+
+                                // Add file
+                                FileContent fileContent = new FileContent(
+                                        "image/jpeg", new File(imageAbsolutePath));
+                                MultipartContent.Part part = new MultipartContent.Part(fileContent);
+                                part.setHeaders(new HttpHeaders().set(
+                                        "Content-Disposition",
+                                        String.format("form-data; name=\"file\"; filename=\"%s\"", imageAbsolutePath)));
+                                content.addPart(part);
+
+                                HttpResponse httpPostResponse = null;
+
+                                try {
+                                    httpPostResponse = requestFactory.buildPostRequest(
+                                            new GenericUrl(getJson.getString("url")), content).execute();
+
+                                    Log.i(TAG, "HTTP STATUS:: " + httpPostResponse.getStatusCode());
+                                    // process the HTTP response object
+                                    String response = httpPostResponse.parseAsString();
+                                    Log.i(TAG, "URI:: " + response);
+                                    JSONObject postJson = new JSONObject(response);
+
+                                    //update the uri in the database
+                                    Note updatedNote = new Note();
+                                    updatedNote.id = newNote.id;
+                                    updatedNote.uri = postJson.getString("uri");
+                                    dbHelper.updateNote(updatedNote);
+
+
+                                } finally {
+                                    httpPostResponse.disconnect();
+                                }
+                            }
+                            //upload the Note Json to the server. It now has the URI to the image,and textextract
+                            {
+                                JSONObject jsonObject = new JSONObject();
+
+                                Note note = dbHelper.fetchNote(newNote.id);
+                                jsonObject.put("rowId", note.id);
+                                jsonObject.put("wine", note.wine);
+                                jsonObject.put("rating", note.rating);
+                                jsonObject.put("textExtract", note.textExtract);
+                                jsonObject.put("notes", note.notes);
+                                jsonObject.put("uri", note.uri);
+                                jsonObject.put("timeCreatedMs", note.created);
+                                jsonObject.put("timeCreatedTimeZoneOffsetMs", TimeZone.getDefault()
+                                        .getRawOffset());
+                                jsonObject.put("timeUpdatedMs", note.updated);
+                                jsonObject.put("timeUpdatedTimeZoneOffsetMs", TimeZone.getDefault()
+                                        .getRawOffset());
+
+
+                                HttpResponse httpPostResponse = null;
+
+                                try {
+                                    httpPostResponse = requestFactory.buildPostRequest(
+                                            new GenericUrl(Configuration.CONTENTS_URL),
+                                                new ByteArrayContent("application/json", jsonObject.toString().getBytes())).execute();
+
+                                    Log.i(TAG, "HTTP STATUS:: " + httpPostResponse.getStatusCode());
+
+
+                                } finally {
+                                    httpPostResponse.disconnect();
+                                }
+                            }
+
+                        }
+
+
+                    } catch (Throwable e) {
+                        Log.e(TAG, e.getMessage(), e);
+                    }
+
+
+
+//                    long BACKOFF = Configuration.HTTP_BACKOFF_MS
+//                            + new Random().nextInt(Configuration.HTTP_BACKOFF_MS);
+//                    int MAX_ATTEMPTS = Configuration.HTTP_MAX_ATTEMPTS;
+//                    int CONNECTION_TIMEOUT = Configuration.HTTP_CONNECTION_TIMEOUT;
+//                    int SOCKET_TIMEOUT = Configuration.HTTP_SOCKET_TIMEOUT;
+//                    int[] validResponseCodes = {200};
+//
+//                    for (int j = 1; j <= MAX_ATTEMPTS; j++) {
+//                        Log.d(TAG, "Attempt #" + j + " to upload content");
+//                        try {
+//                            Log.d(TAG, "Entering");
+//                            // wait for network connectivity; will download the content list
+//                            // over cellular network
+//                            int lStatusCode = Utils.retryIfNetworkDisconnected(mConnectivityManager);
+//                            if (lStatusCode == StatusCode.NETWORK_DISCONNECTED)
+//                                break;
+//
+//                            HashMap<String, String> params = new HashMap<String, String>();
+//                            params.put("id", String.valueOf(note.id));
+//
+//                            String responseJson = HttpUtils.doHttpGet(Configuration.DROPBOX_URL, CONNECTION_TIMEOUT, SOCKET_TIMEOUT, validResponseCodes);
+//
+//                            JSONObject jsonObject = new JSONObject(responseJson);
+//                            String url = jsonObject.getString("url");
+//                            Log.d(TAG, "URL: " + url);
+//                            String uri = HttpUtils.doMultiPartHttpPost(url,
+//                                    imageAbsolutePath,
+//                                    CONNECTION_TIMEOUT,
+//                                    SOCKET_TIMEOUT, validResponseCodes);
+//                            Log.d(TAG, "URI: " + uri);
+//                            JSONObject jsonObject1 = new JSONObject();
+//                            jsonObject1.put("id", note.id);
+//                            jsonObject1.put("uri", uri);
+
+//                            HttpUtils.doHttpPost(Configuration.CONTENTS_URL, jsonObject1, "application/json", CONNECTION_TIMEOUT, SOCKET_TIMEOUT, validResponseCodes);
+
+                            // success
+//                            j = MAX_ATTEMPTS;
+//                        } catch (ClientProtocolException e) {
+//                            Log.e(TAG, e.getMessage(), e);
+//                        } catch (IOException e) {
+//                            Log.e(TAG, "IOException on attempt " + j, e);
+//                            if (j == MAX_ATTEMPTS) {
+//                                break;
+//                            }
+//                            try {
+//                                Log.d(TAG, "Sleeping for " + BACKOFF
+//                                        + " ms before retry");
+//                                Thread.sleep(BACKOFF);
+//                            } catch (InterruptedException e1) {
+//                                // Activity finished
+//                                // before we
+//                                // complete - exit.
+//                                Log.d(TAG, "Thread interrupted: abort remaining retries!");
+//                                Thread.currentThread().interrupt();
+//                            }
+//                            // increase backoff
+//                            // exponentially
+//                            BACKOFF *= 2;
+//
+//                        } catch (StatusCodeException e) {
+//                            Log.e(TAG, e.getMessage(), e);
+//                            if (e.getStatusCode() == 503) {
+//                                Log.e(TAG, "Failed to upload on attempt " + j, e);
+//                                if (j == MAX_ATTEMPTS) {
+//                                    break;
+//                                }
+//                                try {
+//                                    Log.d(TAG, "Sleeping for " + BACKOFF
+//                                            + " ms before retry");
+//                                    Thread.sleep(BACKOFF);
+//                                } catch (InterruptedException e1) {
+//                                    // Activity finished before we complete - exit.
+//                                    Log.d(TAG, "Thread interrupted: abort remaining retries!");
+//                                    Thread.currentThread().interrupt();
+//                                }
+//                                // increase backoff exponentially
+//                                BACKOFF *= 2;
+//                            } else {
+//                                break;
+//                            }
+//                        } finally {
+//                            Log.d(TAG, "Exiting");
+//
+//                        }
+//                    }
 
 
                 } catch (Throwable e) {
@@ -485,23 +733,31 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
         }.execute();
     }
 
-    /**
-     * @param response
-     * @return
-     */
-    private String convertResponseToString(BatchAnnotateImagesResponse response) {
-        String message = "";
+    private static class MyInitializer implements HttpRequestInitializer, HttpUnsuccessfulResponseHandler {
 
-        List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
-        if (labels != null) {
-            for (EntityAnnotation label : labels) {
-                message += String.format("%s", label.getDescription());
+        @Override
+        public boolean handleResponse(
+                HttpRequest request, HttpResponse response, boolean retrySupported) throws IOException {
+            Log.d(TAG, response.getStatusCode() + " " + response.getStatusMessage());
+            if(response.getStatusCode() == 503){
+                //retry
+                return true;
             }
+            return false;
         }
 
-        return message;
+        @Override
+        public void initialize(HttpRequest request) throws IOException {
+            ExponentialBackOff backoff = new ExponentialBackOff.Builder()
+                    .setInitialIntervalMillis(1000)
+                    .setMaxElapsedTimeMillis(900000)
+                    .setMaxIntervalMillis(10000)
+                    .setMultiplier(1.5)
+                    .setRandomizationFactor(0.5)
+                    .build();
+            request.setUnsuccessfulResponseHandler(new HttpBackOffUnsuccessfulResponseHandler(backoff));
+        }
     }
-
 
     @Override
     public void onResume() {
@@ -673,11 +929,11 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
             if (convertView == null) { // if it's not recycled, instantiate and initialize
                 //imageView = new RecyclingImageView(mContext);
                 //imageView = (RecyclingImageView)container.findViewById(R.id.grid_image);
-                view = ((LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.grid_item, container, false);
-                imageView = (RecyclingImageView)view.findViewById(R.id.grid_image);
+                view = ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.grid_item, container, false);
+                imageView = (RecyclingImageView) view.findViewById(R.id.grid_image);
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setLayoutParams(mImageViewLayoutParams);
-                ratingBar = (RatingBar)view.findViewById(R.id.grid_image_rating);
+                ratingBar = (RatingBar) view.findViewById(R.id.grid_image_rating);
 
             } else { // Otherwise re-use the converted view
                 //imageView = (ImageView) convertView;
@@ -697,10 +953,10 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
             // Finally load the image asynchronously into the ImageView, this also takes care of
             // setting a placeholder image while the background thread runs
             //mImageFetcher.loadImage(Images.imageThumbUrls[position - mNumColumns], imageView);
-            mImageFetcher.loadImage(Images.getThumbnailUrls(getActivity()).get(position - mNumColumns), imageView, new ImageWorker.OnImageLoadedListener(){
+            mImageFetcher.loadImage(Images.getThumbnailUrls(getActivity()).get(position - mNumColumns), imageView, new ImageWorker.OnImageLoadedListener() {
                 @Override
                 public void onImageLoaded(boolean success) {
-                    if(ratingBar !=null)
+                    if (ratingBar != null)
                         ratingBar.setNumStars(3);
                 }
             });

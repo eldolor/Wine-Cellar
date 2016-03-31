@@ -11,6 +11,7 @@ public class Note implements Serializable{
     public String notes="";
     public String share="";
     public String picture="";
+    public String uri = "";
     public long created;
     public long updated;
 }

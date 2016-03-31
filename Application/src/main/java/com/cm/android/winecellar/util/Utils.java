@@ -21,6 +21,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Environment;
@@ -366,6 +367,61 @@ public class Utils {
 
     }
 
+    public static int retryIfNetworkDisconnected(ConnectivityManager connectivityManager) {
+        long NETWORK_DISCONNECTED_BACKOFF = Configuration.HTTP_BACKOFF_MS
+                + new Random().nextInt(Configuration.HTTP_BACKOFF_MS);
+        int MAX_ATTEMPTS = Configuration.HTTP_MAX_ATTEMPTS;
+        try {
+            android.util.Log.d(Utils.sTag,"Entering");
+            for (int j = 1; j <= MAX_ATTEMPTS; j++) {
+
+                if (isNetworkConnected(connectivityManager)) {
+                    // success
+                    j = MAX_ATTEMPTS;
+                    return StatusCode.SUCCESS;
+                } else {
+                    // Sleep till the network state is connected, and then
+                    // restart
+                    // the download process
+                    try {
+                        android.util.Log.d(Utils.sTag,"Network disconnected. Sleeping for "
+                                    + NETWORK_DISCONNECTED_BACKOFF
+                                    + " ms before retry");
+                        Thread.sleep(NETWORK_DISCONNECTED_BACKOFF);
+                    } catch (InterruptedException e1) {
+                        // Activity
+                        // finished
+                        // before we
+                        // complete -
+                        // exit.
+                        android.util.Log.d(Utils.sTag,"Thread interrupted: abort remaining retries!");
+                        Thread.currentThread().interrupt();
+                    }
+                    // increase backoff
+                    // exponentially
+                    NETWORK_DISCONNECTED_BACKOFF *= 2;
+
+                }
+            }
+            return StatusCode.NETWORK_DISCONNECTED;
+        } finally {
+            android.util.Log.d(Utils.sTag,"Exiting");
+
+        }
+
+    }
+
+    private static boolean isNetworkConnected(ConnectivityManager connectivityManager) {
+        return (connectivityManager.getActiveNetworkInfo() != null && connectivityManager
+                .getActiveNetworkInfo().isConnected());
+    }
+
+    private static boolean isConnectedToWifi(ConnectivityManager connectivityManager) {
+        if (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+                .isConnected())
+            return true;
+        return false;
+    }
 
     public static final String[] WINES = new String[] { "…chezeaux",
             "Sauterns", "Blanc de Noirs", "Roussette de Savoie",

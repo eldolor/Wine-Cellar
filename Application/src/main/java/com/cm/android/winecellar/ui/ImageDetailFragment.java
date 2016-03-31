@@ -45,6 +45,7 @@ import com.cm.android.winecellar.AnalyticsTrackers;
 import com.cm.android.winecellar.db.Note;
 import com.cm.android.winecellar.db.NotesDbAdapter;
 import com.cm.android.winecellar.util.AsyncTask;
+import com.cm.android.winecellar.util.Configuration;
 import com.cm.android.winecellar.util.ImageFetcher;
 import com.cm.android.winecellar.util.ImageWorker;
 import com.cm.android.winecellar.util.Utils;
@@ -52,26 +53,41 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+//import com.google.api.client.extensions.android.http.AndroidHttp;
+//import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+//import com.google.api.client.http.HttpTransport;
+//import com.google.api.client.json.JsonFactory;
+//import com.google.api.client.json.gson.GsonFactory;
+//import com.google.api.services.vision.v1.Vision;
+//import com.google.api.services.vision.v1.VisionRequestInitializer;
+//import com.google.api.services.vision.v1.model.AnnotateImageRequest;
+//import com.google.api.services.vision.v1.model.BatchAnnotateImagesRequest;
+//import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
+//import com.google.api.services.vision.v1.model.Feature;
+//import com.google.api.services.vision.v1.model.Image;
+import com.google.api.client.http.ByteArrayContent;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.vision.v1.Vision;
-import com.google.api.services.vision.v1.VisionRequestInitializer;
-import com.google.api.services.vision.v1.model.AnnotateImageRequest;
-import com.google.api.services.vision.v1.model.BatchAnnotateImagesRequest;
-import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
-import com.google.api.services.vision.v1.model.Feature;
-import com.google.api.services.vision.v1.model.Image;
+import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.util.ExponentialBackOff;
 import com.vvw.activity.lite.R;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 
 /**
  * This fragment will populate the children of the ViewPager from {@link ImageDetailActivity}.
@@ -171,7 +187,7 @@ public class ImageDetailFragment extends Fragment implements ImageWorker.OnImage
         mSave = (ImageView) v.findViewById(R.id.save);
         mDateCreated = (TextView) v.findViewById(R.id.date_created_label);
         mDateUpdated = (TextView) v.findViewById(R.id.date_updated_label);
-        mWine = (AutoCompleteTextView)v.findViewById(R.id.wine);
+        mWine = (AutoCompleteTextView) v.findViewById(R.id.wine);
 
         return v;
     }
@@ -323,24 +339,17 @@ public class ImageDetailFragment extends Fragment implements ImageWorker.OnImage
         Log.i(sTag, "load");
         try {
             if (mRowId != null) {
-                Cursor cursor = mDbHelper.fetchNote(mRowId);
-                getActivity().startManagingCursor(cursor);
-                String ratingStr = cursor.getString(cursor
-                        .getColumnIndexOrThrow(NotesDbAdapter.KEY_RATING));
+                Note note = mDbHelper.fetchNote(mRowId);
+                String ratingStr = note.rating;
                 mRatingBar.setRating(Float.valueOf(ratingStr));
-                mWine.setText(cursor.getString(cursor
-                        .getColumnIndexOrThrow(NotesDbAdapter.KEY_WINE)));
-                mTextExtract.setText(cursor.getString(cursor
-                        .getColumnIndexOrThrow(NotesDbAdapter.KEY_TEXT_EXTRACT)));
-                mNotes.setText(cursor.getString(cursor
-                        .getColumnIndexOrThrow(NotesDbAdapter.KEY_NOTES)));
+                mWine.setText(note.wine);
+                mTextExtract.setText(note.textExtract);
+                mNotes.setText(note.notes);
                 String dateAdded = "Added on "
-                        + mDateFormat.format(cursor.getLong(cursor
-                        .getColumnIndex(NotesDbAdapter.KEY_CREATED)));
+                        + mDateFormat.format(note.created);
                 mDateCreated.setText(dateAdded);
                 String dataUpdated = "Last updated on "
-                        + mDateFormat.format(cursor.getLong(cursor
-                        .getColumnIndex(NotesDbAdapter.KEY_UPDATED)));
+                        + mDateFormat.format(note.updated);
                 mDateUpdated.setText(dataUpdated);
             }
         } catch (Throwable e) {
@@ -370,33 +379,61 @@ public class ImageDetailFragment extends Fragment implements ImageWorker.OnImage
             }
 
             // Do the real work in an async task, because we need to use the network anyway
-//            new android.os.AsyncTask<Object, Void, String>() {
-//                @Override
-//                protected String doInBackground(Object... params) {
-//                    try {
-//                        HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
-//                        JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-//                        NotesDbAdapter dbHelper = null;
-//                        Note note = (Note)params[0];
-//
-//
-//                        return null;
-//
-//                    } catch (Throwable e) {
-//                        com.cm.android.common.logger.Log.d("ASYNCTASK", "failed to make API request because of " +
-//                                e.getMessage());
-//                    }
-//                    return "Cloud Vision API request failed. Check logs for details.";
-//                }
-//
-//                protected void onPostExecute(String result) {
-//                    //mImageDetails.setText(result);
-//                    com.cm.android.common.logger.Log.d("ASYNCTASK", "RESULT " +
-//                            result);
-//                }
-//
-//
-//            }.execute(note);
+            new android.os.AsyncTask<Object, Void, Void>() {
+                @Override
+                protected Void doInBackground(Object... params) {
+                    NotesDbAdapter dbHelper = null;
+                    long rowId = (Long) params[0];
+                    try {
+                        HttpTransport httpTransport = new NetHttpTransport();
+                        HttpRequestFactory requestFactory = httpTransport.createRequestFactory(new MyInitializer());
+
+                        JSONObject jsonObject = new JSONObject();
+
+                        dbHelper = new NotesDbAdapter(getActivity());
+                        dbHelper.open();
+                        Note note = dbHelper.fetchNote(rowId);
+                        jsonObject.put("rowId", note.id);
+                        jsonObject.put("wine", note.wine);
+                        jsonObject.put("rating", note.rating);
+                        jsonObject.put("textExtract", note.textExtract);
+                        jsonObject.put("notes", note.notes);
+                        jsonObject.put("uri", note.uri);
+                        jsonObject.put("timeCreatedMs", note.created);
+                        jsonObject.put("timeCreatedTimeZoneOffsetMs", TimeZone.getDefault()
+                                .getRawOffset());
+                        jsonObject.put("timeUpdatedMs", note.updated);
+                        jsonObject.put("timeUpdatedTimeZoneOffsetMs", TimeZone.getDefault()
+                                .getRawOffset());
+
+
+                        HttpResponse httpPostResponse = null;
+
+                        try {
+                            httpPostResponse = requestFactory.buildPutRequest(
+                                    new GenericUrl(Configuration.CONTENTS_URL),
+                                    new ByteArrayContent("application/json", jsonObject.toString().getBytes())).execute();
+
+                            Log.i(sTag, "HTTP STATUS:: " + httpPostResponse.getStatusCode());
+
+
+                        } finally {
+                            httpPostResponse.disconnect();
+                        }
+
+                    } catch (Throwable e) {
+                        Log.e(sTag, "error: "
+                                + ((e.getMessage() != null) ? e.getMessage().replace(" ",
+                                "_") : ""), e);
+                    } finally {
+                        if (dbHelper != null)
+                            dbHelper.close();
+
+                    }
+                    return null;
+                }
+
+            }.execute(mRowId);
 
         } catch (Throwable e) {
             Log.e(sTag, "error: "
@@ -406,10 +443,71 @@ public class ImageDetailFragment extends Fragment implements ImageWorker.OnImage
 
     }
 
+    private static class MyInitializer implements HttpRequestInitializer, HttpUnsuccessfulResponseHandler {
+
+        @Override
+        public boolean handleResponse(
+                HttpRequest request, HttpResponse response, boolean retrySupported) throws IOException {
+            Log.d("MyInitializer", response.getStatusCode() + " " + response.getStatusMessage());
+            if (response.getStatusCode() == 503) {
+                //retry
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void initialize(HttpRequest request) throws IOException {
+            ExponentialBackOff backoff = new ExponentialBackOff.Builder()
+                    .setInitialIntervalMillis(1000)
+                    .setMaxElapsedTimeMillis(900000)
+                    .setMaxIntervalMillis(10000)
+                    .setMultiplier(1.5)
+                    .setRandomizationFactor(0.5)
+                    .build();
+            request.setUnsuccessfulResponseHandler(new HttpBackOffUnsuccessfulResponseHandler(backoff));
+        }
+    }
+
+
     @Override
     public void onImageDeleted(boolean success) {
         //getActivity().getSupportFragmentManager().popBackStack();
         mProgressBar.setVisibility(View.GONE);
+        // Do the real work in an async task, because we need to use the network anyway
+        new android.os.AsyncTask<Object, Void, Void>() {
+            @Override
+            protected Void doInBackground(Object... params) {
+                long rowId = (Long) params[0];
+                try {
+                    HttpTransport httpTransport = new NetHttpTransport();
+                    HttpRequestFactory requestFactory = httpTransport.createRequestFactory(new MyInitializer());
+                    GenericUrl genericUrl = new GenericUrl(Configuration.CONTENTS_URL + "/" + rowId + "/" + System.currentTimeMillis() + "/" + TimeZone.getDefault()
+                            .getRawOffset());
+
+                    HttpResponse httpPostResponse = null;
+
+                    try {
+                        httpPostResponse = requestFactory.buildDeleteRequest(
+                                genericUrl).execute();
+
+                        Log.i(sTag, "HTTP STATUS:: " + httpPostResponse.getStatusCode());
+
+
+                    } finally {
+                        httpPostResponse.disconnect();
+                    }
+
+                } catch (Throwable e) {
+                    Log.e(sTag, "error: "
+                            + ((e.getMessage() != null) ? e.getMessage().replace(" ",
+                            "_") : ""), e);
+                }
+                return null;
+            }
+
+        }.execute(mRowId);
+
         getActivity().finish();
     }
 
